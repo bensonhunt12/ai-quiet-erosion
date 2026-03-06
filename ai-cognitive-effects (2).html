@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Quiet Erosion — AI & The Mind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --aged: #e8dfc8;
+    --rust: #c0392b;
+    --gold: #b8860b;
+    --dim: #8a7d6a;
+    --mid: #4a3f30;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Libre Baskerville', Georgia, serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 6vw;
+    position: relative;
+    border-bottom: 2px solid var(--ink);
+    overflow: hidden;
+  }
+
+  .header-rule {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0px, var(--ink) 30px, var(--paper) 30px, var(--paper) 32px);
+  }
+
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.5s;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .header-sub {
+    font-family: 'Libre Baskerville', serif;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 1.7;
+    color: var(--mid);
+    max-width: 600px;
+    margin-top: 2.5rem;
+    font-style: italic;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.8s;
+  }
+
+  .header-deco {
+    position: absolute;
+    right: 6vw;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 20vw;
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(26,18,8,0.08);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    animation: fadeIn 1.5s ease forwards 1s;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 6vw;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 1.2s;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--dim);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--ink);
+    animation: scanline 2s ease-in-out infinite;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: sticky;
+    top: 0;
+    background: var(--ink);
+    color: var(--paper);
+    z-index: 100;
+    padding: 1rem 6vw;
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--paper); }
+  nav .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--paper);
+    margin-right: auto;
+    letter-spacing: 0;
+  }
+
+  /* ---- SECTIONS ---- */
+  section {
+    padding: 7rem 6vw;
+    border-bottom: 1px solid rgba(26,18,8,0.15);
+    position: relative;
+  }
+
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-num::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: var(--dim);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 800px;
+    margin-bottom: 3rem;
+  }
+
+  h2 em { font-style: italic; color: var(--rust); }
+
+  .lead {
+    font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+    line-height: 1.85;
+    color: var(--mid);
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ---- CARDS ---- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    margin-top: 4rem;
+    border: 2px solid var(--ink);
+  }
+
+  .card {
+    background: var(--paper);
+    padding: 2.5rem;
+    border-right: 2px solid var(--ink);
+    position: relative;
+    transition: background 0.3s;
+  }
+  .card:last-child { border-right: none; }
+  .card:hover { background: var(--aged); }
+
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .card p {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--mid);
+  }
+
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  /* ---- STAT BLOCK ---- */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    margin: 4rem 0;
+    padding: 3rem 0;
+    border-top: 1px solid rgba(26,18,8,0.15);
+    border-bottom: 1px solid rgba(26,18,8,0.15);
+  }
+
+  .stat { text-align: center; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--rust);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 0.5rem;
+    display: block;
+  }
+
+  /* ---- PULLQUOTE ---- */
+  .pullquote {
+    border-left: 4px solid var(--rust);
+    padding: 2rem 2.5rem;
+    margin: 3.5rem 0;
+    background: var(--aged);
+    max-width: 700px;
+  }
+
+  .pullquote p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .pullquote cite {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    display: block;
+    margin-top: 1rem;
+  }
+
+  /* ---- DARK SECTION ---- */
+  .dark-section {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .dark-section .section-num { color: rgba(245,240,232,0.4); }
+  .dark-section .section-num::after { background: rgba(245,240,232,0.4); }
+  .dark-section h2 { color: var(--paper); }
+  .dark-section .lead { color: rgba(245,240,232,0.7); }
+  .dark-section .pullquote {
+    border-left-color: var(--gold);
+    background: rgba(255,255,255,0.05);
+  }
+  .dark-section .pullquote p { color: var(--paper); }
+
+  .dark-section .card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--paper);
+  }
+  .dark-section .card:hover { background: rgba(255,255,255,0.08); }
+  .dark-section .card h3 { color: var(--paper); }
+  .dark-section .card p { color: rgba(245,240,232,0.65); }
+  .dark-section .card-grid {
+    border-color: rgba(255,255,255,0.12);
+  }
+  .dark-section .card { border-right-color: rgba(255,255,255,0.12); }
+
+  /* ---- FOMO SECTION ---- */
+  .fomo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 4rem;
+    align-items: start;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    header { padding: 5rem 5vw 4rem; min-height: 100svh; }
+    .header-label { font-size: 0.6rem; letter-spacing: 0.2em; margin-bottom: 2rem; }
+    h1 { font-size: clamp(3rem, 14vw, 5rem); line-height: 1; }
+    .header-sub { font-size: 1rem; margin-top: 1.5rem; }
+    .header-deco { display: none; }
+    .scroll-hint { bottom: 1.5rem; }
+
+    nav {
+      padding: 0.85rem 5vw;
+      gap: 1.5rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav .nav-brand { font-size: 0.85rem; flex-shrink: 0; }
+    nav a { font-size: 0.6rem; flex-shrink: 0; letter-spacing: 0.15em; }
+
+    section { padding: 4rem 5vw; }
+    h2 { font-size: clamp(1.8rem, 7vw, 2.8rem); margin-bottom: 2rem; }
+    .lead { font-size: 1rem; margin-bottom: 2rem; }
+
+    .card-grid { grid-template-columns: 1fr; border: 1px solid var(--ink); }
+    .card { border-right: none; border-bottom: 1px solid var(--ink); padding: 1.75rem; }
+    .card:last-child { border-bottom: none; }
+    .dark-section .card { border-bottom-color: rgba(255,255,255,0.12); }
+
+    .stat-row { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 0; margin: 2.5rem 0; }
+    .stat-num { font-size: 2.8rem; }
+
+    .pullquote { padding: 1.25rem 1.5rem; margin: 2rem 0; }
+    .pullquote p { font-size: 1.05rem; }
+
+    .fomo-grid { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 2.5rem; }
+
+    .compare-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 2rem; border: 1px solid rgba(255,255,255,0.12); }
+    .compare-table { margin-top: 0; font-size: 0.82rem; min-width: 560px; }
+    .compare-table th, .compare-table td { padding: 0.75rem 1rem; }
+
+    #commenter-name, #comment-input { font-size: 1rem; }
+
+    footer { flex-direction: column; text-align: center; gap: 0.5rem; padding: 2rem 5vw; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: clamp(2.6rem, 16vw, 3.5rem); }
+    .card { padding: 1.4rem; }
+    .stat-num { font-size: 2.4rem; }
+    section { padding: 3rem 5vw; }
+  }
+
+  .fomo-list {
+    list-style: none;
+  }
+
+  .fomo-list li {
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(245,240,232,0.1);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: rgba(245,240,232,0.75);
+  }
+
+  .fomo-list li .bullet {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ---- COMPARISON TABLE ---- */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3rem;
+    font-size: 0.95rem;
+  }
+
+  .compare-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    background: rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .compare-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    color: rgba(245,240,232,0.7);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+
+  .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  .tag-paid {
+    background: var(--rust);
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.2em 0.5em;
+    border-radius: 2px;
+  }
+
+  .tag-free {
+    background: #2d6a4f;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.2em 0.5em;
+    border-radius: 2px;
+  }
+
+  /* ---- CONCLUSION ---- */
+  .conclusion {
+    background: var(--aged);
+  }
+
+  .conclusion-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .conclusion h2 {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .manifesto {
+    font-size: clamp(1rem, 1.8vw, 1.15rem);
+    line-height: 2;
+    color: var(--mid);
+    margin: 2rem 0;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--ink);
+    color: rgba(245,240,232,0.4);
+    padding: 2.5rem 6vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer span { color: var(--rust); }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scanline {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* ---- REVEAL ON SCROLL ---- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- INLINE HIGHLIGHT ---- */
+  mark {
+    background: none;
+    color: var(--rust);
+    font-style: italic;
+  }
+
+  .dark-section mark { color: var(--gold); }
+
+  /* ---- DIVIDER ---- */
+  .ornament {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dim);
+    padding: 2rem 0;
+    letter-spacing: 1rem;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-rule"></div>
+  <div class="header-label">An editorial on technology &amp; cognition</div>
+  <h1>The <span style="font-style:normal; color:var(--ink); -webkit-text-stroke: 2px var(--rust); text-shadow: 3px 3px 0 var(--rust);">Quiet</span><br><em>Erosion</em></h1>
+  <p class="header-sub">How AI is quietly reshaping how we learn, remember, and think — and how the fear of falling behind is being sold back to us as a product.</p>
+  <div class="header-deco">AI</div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to read
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">The Quiet Erosion</span>
+  <a href="#learning">Learning</a>
+  <a href="#memory">Memory</a>
+  <a href="#work">Work</a>
+  <a href="#fomo">FOMO</a>
+  <a href="#conclusion">Verdict</a>
+</nav>
+
+<!-- SECTION 1: LEARNING -->
+<section id="learning">
+  <div class="section-num">01 — Learning</div>
+  <h2 class="reveal">We are <em>outsourcing</em> the struggle — and losing the gain</h2>
+  <p class="lead reveal">The friction of not knowing something used to be the very engine of learning. Today, AI removes that friction instantly. That's both its greatest gift and its most dangerous feature.</p>
+
+  <div class="pullquote reveal">
+    <p>"The moment you hand the hard part to a machine, you stop building the mental model. And without the mental model, you don't really know anything."</p>
+    <cite>— Cognitive science principle, desirable difficulties research</cite>
+  </div>
+
+  <p class="lead reveal">When a student asks an AI to explain a concept, they get a polished answer — but they skip the productive confusion that precedes genuine understanding. They skip trial and error, failed attempts, re-reading, and the slow crystallization of insight. Research on <mark>"desirable difficulties"</mark> shows that easier learning leads to faster forgetting. The harder the acquisition, the deeper the retention.</p>
+
+  <div class="card-grid reveal">
+    <div class="card">
+      <span class="card-tag">Pattern 01</span>
+      <span class="card-icon">📝</span>
+      <h3>Skipping the Draft</h3>
+      <p>Students and professionals increasingly skip the first draft entirely, jumping to AI-generated output. But the draft — messy, imperfect, effortful — is where thinking actually happens. The output was never the point.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Pattern 02</span>
+      <span class="card-icon">🔍</span>
+      <h3>Search Without Exploration</h3>
+      <p>AI answers collapse the exploratory process of research. Traditional searching meant encountering unexpected ideas, rabbit holes, and adjacent knowledge. AI returns a destination without the journey that builds real expertise.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Pattern 03</span>
+      <span class="card-icon">🧩</span>
+      <h3>No Transfer of Skill</h3>
+      <p>When you have code written for you, you don't learn to code. When you have essays drafted for you, you don't learn to argue. AI-generated work does not transfer capability back to the user. The task is completed; the person is unchanged.</p>
+    </div>
+  </div>
+
+  <div class="stat-row reveal">
+    <div class="stat">
+      <span class="stat-num">72%</span>
+      <span class="stat-label">of students admitted using AI<br>to complete homework tasks</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">3×</span>
+      <span class="stat-label">faster forgetting when material<br>is given rather than struggled for</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">↓40%</span>
+      <span class="stat-label">decline in deep reading habits<br>since generative AI became mainstream</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: MEMORY -->
+<section id="memory">
+  <div class="section-num">02 — Memory</div>
+  <h2 class="reveal">The mind that never <em>stores</em> anything</h2>
+  <p class="lead reveal">External memory has existed since the first cave painting. But the difference between writing in a notebook and relying on AI is profound: one offloads storage while keeping retrieval manual; the other offloads both. When you never have to recall, you never build recall.</p>
+
+  <div class="pullquote reveal">
+    <p>"Cognitive offloading is only harmless when you can take the load back. With AI, many people never do."</p>
+    <cite>— Transactive memory research, cognitive psychology</cite>
+  </div>
+
+  <p class="lead reveal">Memory researchers describe a concept called <mark>transactive memory</mark> — the way our brains store a "pointer" to external knowledge rather than the knowledge itself. We rely on our phones for phone numbers; we rely on colleagues for specialized facts. The problem with AI is scale: we're pointing to everything. When everything is outsourced, nothing sticks. The internal map degrades.</p>
+
+  <div class="card-grid reveal">
+    <div class="card">
+      <span class="card-tag">Effect 01</span>
+      <span class="card-icon">🗂️</span>
+      <h3>The Google Effect, Amplified</h3>
+      <p>Studies showed that simply knowing information was searchable made people less likely to remember it. With AI providing instant synthesis, this effect is turbocharged. Why encode anything when a better answer is one prompt away?</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Effect 02</span>
+      <span class="card-icon">🔗</span>
+      <h3>No Associative Network</h3>
+      <p>Human memory works by connecting ideas — new information hooks onto existing mental scaffolding. AI breaks this process by delivering pre-connected answers. You get conclusions without building the network that makes them meaningful.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Effect 03</span>
+      <span class="card-icon">🌫️</span>
+      <h3>Context Collapse</h3>
+      <p>When you rely on AI to hold context across conversations and tasks, your own sense of narrative, progress, and continuity weakens. You become dependent on the machine to know where you left off — and who you are professionally.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: WORK -->
+<section id="work" class="dark-section">
+  <div class="section-num">03 — Work</div>
+  <h2 class="reveal">Productivity theater: doing <em>more</em>, experiencing <em>less</em></h2>
+  <p class="lead reveal">AI makes workers faster. It also risks making them shallower. When the hardest parts of a task — the thinking, the wrestling, the judgment calls — are automated away, what remains is supervision and prompting. That may feel productive. It rarely feels meaningful.</p>
+
+  <div class="pullquote reveal">
+    <p>"The value of work has never been purely the output. It's been the competence built, the judgment sharpened, the identity formed. Automation has always had to answer for this."</p>
+    <cite>— Labor and automation theory</cite>
+  </div>
+
+  <p class="lead reveal">There's a hidden cost in letting AI draft your emails, summarize your meetings, write your reports, and plan your projects: you stop <mark>practicing the craft</mark> of your own profession. Junior employees who rely on AI from the start may never develop the baseline competence that makes senior work possible. The ladder of expertise loses its lower rungs.</p>
+
+  <div class="card-grid reveal">
+    <div class="card">
+      <span class="card-tag">Risk 01</span>
+      <span class="card-icon">📉</span>
+      <h3>Skill Atrophy</h3>
+      <p>Just as GPS use correlates with reduced spatial navigation ability, regular AI use for writing, analysis, and decision-making may reduce those capacities over time. Use it or lose it applies to cognitive skills just as much as physical ones.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Risk 02</span>
+      <span class="card-icon">🪞</span>
+      <h3>Confidence Without Competence</h3>
+      <p>AI-assisted workers often feel more capable than they are — a dangerous illusion. They can produce high-quality output until the AI is unavailable, the context is unusual, or real-time judgment is required. Then the gap shows.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag">Risk 03</span>
+      <span class="card-icon">🔋</span>
+      <h3>The Prompt Dependency Loop</h3>
+      <p>When we restructure work around AI, we stop practicing the underlying thinking. In time, the AI isn't a tool we use — it's a crutch we can't walk without. The dependency is rarely felt until the moment it's tested.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: FOMO -->
+<section id="fomo" class="dark-section">
+  <div class="section-num">04 — The FOMO Machine</div>
+  <h2 class="reveal">The fear of being <em>left behind</em> is being sold to you</h2>
+  <p class="lead reveal">There is a second story running alongside the cognitive one — a commercial story. The same technology creating dependency is generating enormous anxiety about mastering it. That anxiety is a market. And a well-targeted market is enormously profitable.</p>
+
+  <div class="fomo-grid reveal">
+    <div>
+      <p style="color:rgba(245,240,232,0.7); line-height:1.85; font-size:0.95rem; margin-bottom:1.5rem;">The AI course industry has exploded. Hundreds of creators sell courses with titles like <mark>"Master AI in 30 Days"</mark> or <mark>"The Only AI Workflow You'll Ever Need"</mark> — for $197, $497, or more. The pitch is always the same: everyone else is learning this. You'll be left behind. But you're safe if you pay now.</p>
+      <p style="color:rgba(245,240,232,0.7); line-height:1.85; font-size:0.95rem; margin-bottom:1.5rem;">This is textbook FOMO marketing — manufacturing urgency by weaponizing your fear of irrelevance. It works because the fear is real enough. AI <em>is</em> changing things. But the knowledge being sold? It's almost always available for free.</p>
+      <p style="color:rgba(245,240,232,0.7); line-height:1.85; font-size:0.95rem;">The cruel irony: the people most likely to buy these courses are those who most value learning — the conscientious, the ambitious, the genuinely curious. They are the easiest to convince that a paid product signals quality over free alternatives.</p>
+    </div>
+
+    <div>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:rgba(245,240,232,0.4); margin-bottom:1.2rem;">The FOMO Playbook</p>
+      <ul class="fomo-list">
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">False Scarcity:</strong> "Enrollment closes Sunday." There is no digital course that actually runs out of seats.</div></li>
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">The Expert Gap:</strong> "This took me 3 years to learn." Designed to make you feel behind before you've started.</div></li>
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">Salary Bait:</strong> "AI skills can earn you $200k." Real, but irrelevant to a $300 course on prompt engineering.</div></li>
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">Competitor Threat:</strong> "Your coworkers are already learning this." Social proof used as pressure, not information.</div></li>
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">Convenience Premium:</strong> "Everything in one place." YouTube already has this. It's called a playlist. It's free.</div></li>
+        <li><span class="bullet">▸</span><div><strong style="color:var(--paper)">Certification Theater:</strong> A certificate of completion for a non-accredited course carries no weight employers can't see through.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="reveal" style="margin-top:5rem;">
+    <p style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:rgba(245,240,232,0.4); margin-bottom:1.5rem;">What you're paying for vs. what's already free</p>
+    <div class="compare-table-wrap"><table class="compare-table">
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th>Paid Course Claims</th>
+          <th>Free Alternative</th>
+          <th>Quality Gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Prompt Engineering</td>
+          <td>$197–$497 course <span class="tag-paid">paid</span></td>
+          <td>Anthropic, OpenAI official docs + YouTube <span class="tag-free">free</span></td>
+          <td>Minimal. Docs are often better.</td>
+        </tr>
+        <tr>
+          <td>AI for Productivity</td>
+          <td>$99–$299 "system" <span class="tag-paid">paid</span></td>
+          <td>Ali Abdaal, Thomas Frank, countless channels <span class="tag-free">free</span></td>
+          <td>Negligible. Same frameworks, same tools.</td>
+        </tr>
+        <tr>
+          <td>AI Coding (Python + LLMs)</td>
+          <td>$399 bootcamp <span class="tag-paid">paid</span></td>
+          <td>freeCodeCamp, fast.ai, Hugging Face docs <span class="tag-free">free</span></td>
+          <td>Paid rarely exceeds free technical depth.</td>
+        </tr>
+        <tr>
+          <td>ChatGPT Business Use</td>
+          <td>$249 "masterclass" <span class="tag-paid">paid</span></td>
+          <td>YouTube tutorials, official use-case guides <span class="tag-free">free</span></td>
+          <td>Almost zero. The tool teaches itself with use.</td>
+        </tr>
+        <tr>
+          <td>AI Image / Video Tools</td>
+          <td>$150 course <span class="tag-paid">paid</span></td>
+          <td>Tool-specific YouTube channels, Reddit communities <span class="tag-free">free</span></td>
+          <td>Free communities are often more current.</td>
+        </tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section id="conclusion" class="conclusion">
+  <div class="conclusion-inner">
+    <div class="section-num" style="justify-content:center;">05 — Verdict</div>
+    <h2 class="reveal">Use the tools.<br><em>Keep the mind.</em></h2>
+    <p class="manifesto reveal">
+      AI is not inherently the enemy of thinking. Used well, it can handle tedium and free us for genuine creativity. Used carelessly, it handles creativity too — and leaves us operating the machine that replaced us.
+    </p>
+    <p class="manifesto reveal">
+      The goal isn't to avoid AI. It's to remain the author of your own thinking. Use it to amplify judgment you've already built. Be suspicious any time a tool encourages you to skip the hard parts entirely.
+    </p>
+    <p class="manifesto reveal">
+      And when someone tries to sell you mastery over a free tool using language designed to make you feel afraid, late, and unprepared — recognize the play. The anxiety is the product. You were never as behind as the pitch implied.
+    </p>
+
+    <div class="ornament reveal">✦ ✦ ✦</div>
+
+    <div class="pullquote reveal" style="text-align:left;">
+      <p>"The purpose of education is not to fill a bucket but to light a fire. AI can fill buckets very efficiently. That is precisely the problem."</p>
+      <cite>— Adapted from W.B. Yeats</cite>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENTS SECTION -->
+<section id="comments" style="background: var(--aged); border-bottom: none;">
+  <div class="section-num">06 — Reader Thoughts</div>
+  <h2 class="reveal">Add your <em>voice</em></h2>
+  <p class="lead reveal">Have something to add? A counter-argument, a lived experience, a nuance we missed? The floor is yours.</p>
+
+  <div class="reveal" style="max-width: 680px; margin-bottom: 4rem;">
+    <input id="commenter-name" type="text" placeholder="Your name (optional)" maxlength="60"
+      style="width:100%; padding:0.9rem 1.2rem; font-family:'Libre Baskerville',serif; font-size:0.95rem;
+             background: var(--paper); border: 2px solid var(--ink); color: var(--ink);
+             outline: none; margin-bottom: 0.75rem; display:block; transition: border-color 0.2s;"
+      onfocus="this.style.borderColor='var(--rust)'" onblur="this.style.borderColor='var(--ink)'">
+    <div style="position:relative;">
+      <textarea id="comment-input" placeholder="Share your thoughts… (1000 characters max)" maxlength="1000"
+        style="width:100%; height:140px; padding:1rem 1.2rem 2rem; font-family:'Libre Baskerville',serif;
+               font-size:0.95rem; line-height:1.75; background: var(--paper); border: 2px solid var(--ink);
+               color: var(--ink); resize: vertical; outline: none; display:block; transition: border-color 0.2s;"
+        onfocus="this.style.borderColor='var(--rust)'" onblur="this.style.borderColor='var(--ink)'"
+        oninput="updateCharCount()"></textarea>
+      <div id="char-count" style="position:absolute; bottom:0.6rem; right:0.9rem;
+           font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color: var(--dim); letter-spacing:0.1em;">
+        0 / 1000
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1.5rem; margin-top:1rem; flex-wrap:wrap;">
+      <button onclick="submitComment()"
+        style="background: var(--ink); color: var(--paper); border: none; padding: 0.85rem 2.2rem;
+               font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.2em;
+               text-transform:uppercase; cursor:pointer; transition: background 0.2s;"
+        onmouseover="this.style.background='var(--rust)'" onmouseout="this.style.background='var(--ink)'">
+        Post Comment
+      </button>
+      <span id="submit-msg" style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem;
+            letter-spacing:0.15em; color: var(--rust); opacity:0; transition: opacity 0.4s;"></span>
+    </div>
+  </div>
+
+  <div style="max-width: 680px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;
+         margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom: 2px solid var(--ink);">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.2em;
+            text-transform:uppercase; color:var(--dim);">
+        Showing <span id="showing-label">0</span> of <span id="total-label">0</span> comments
+      </span>
+      <div style="display:flex; gap:0.75rem;">
+        <button id="btn-prev" onclick="changePage(-1)"
+          style="background:none; border: 1px solid var(--dim); color:var(--dim); padding:0.35rem 0.8rem;
+                 font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.15em;
+                 text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--ink)';this.style.color='var(--ink)'"
+          onmouseout="this.style.borderColor='var(--dim)';this.style.color='var(--dim)'">← Prev</button>
+        <button id="btn-next" onclick="changePage(1)"
+          style="background:none; border: 1px solid var(--dim); color:var(--dim); padding:0.35rem 0.8rem;
+                 font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.15em;
+                 text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--ink)';this.style.color='var(--ink)'"
+          onmouseout="this.style.borderColor='var(--dim)';this.style.color='var(--dim)'">Next →</button>
+      </div>
+    </div>
+    <div id="comments-list"></div>
+    <div id="no-comments" style="text-align:center; padding:3rem 0; color:var(--dim);
+         font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase;">
+      No comments yet — be the first.
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>The Quiet Erosion — A critical editorial</div>
+  <div>Written for <span>clarity</span>, not comfort</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Stagger card reveals
+  document.querySelectorAll('.card-grid.reveal').forEach(grid => {
+    grid.style.transitionDelay = '0s';
+  });
+
+  // ---- COMMENTS SYSTEM ----
+  const STORAGE_KEY = 'quiet-erosion-comments';
+  const PER_PAGE = 5;
+  let currentPage = 0;
+
+  function loadComments() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function saveComments(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
+
+  function updateCharCount() {
+    const val = document.getElementById('comment-input').value.length;
+    const el = document.getElementById('char-count');
+    el.textContent = val + ' / 1000';
+    el.style.color = val > 900 ? 'var(--rust)' : 'var(--dim)';
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})
+      + ' \u00b7 ' + d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function renderComments() {
+    const comments = loadComments();
+    const list = document.getElementById('comments-list');
+    const noComments = document.getElementById('no-comments');
+    const total = comments.length;
+    const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+
+    const sorted = [...comments].reverse();
+    const pageItems = sorted.slice(currentPage * PER_PAGE, currentPage * PER_PAGE + PER_PAGE);
+
+    document.getElementById('total-label').textContent = total;
+    document.getElementById('showing-label').textContent =
+      total === 0 ? '0' : (currentPage * PER_PAGE + 1) + '\u2013' + Math.min(currentPage * PER_PAGE + PER_PAGE, total);
+
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    btnPrev.style.opacity = currentPage === 0 ? '0.3' : '1';
+    btnPrev.style.pointerEvents = currentPage === 0 ? 'none' : 'auto';
+    btnNext.style.opacity = (currentPage >= totalPages - 1 || total === 0) ? '0.3' : '1';
+    btnNext.style.pointerEvents = (currentPage >= totalPages - 1 || total === 0) ? 'none' : 'auto';
+
+    if (total === 0) {
+      noComments.style.display = 'block';
+      list.innerHTML = '';
+      return;
+    }
+    noComments.style.display = 'none';
+
+    list.innerHTML = pageItems.map((c, i) => {
+      const name = escapeHtml(c.name || 'Anonymous');
+      const text = escapeHtml(c.text);
+      const date = formatDate(c.timestamp);
+      return '<div style="padding:1.5rem 0; border-bottom:1px solid rgba(26,18,8,0.12); animation:fadeUp 0.4s ease forwards; animation-delay:' + (i*0.07) + 's; opacity:0;">'
+        + '<div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">'
+        + '<span style="font-family:\'Playfair Display\',serif; font-weight:700; font-size:1rem;">' + name + '</span>'
+        + '<span style="font-family:\'IBM Plex Mono\',monospace; font-size:0.6rem; letter-spacing:0.1em; color:var(--dim);">' + date + '</span>'
+        + '</div>'
+        + '<p style="font-size:0.95rem; line-height:1.8; color:var(--mid);">' + text + '</p>'
+        + '</div>';
+    }).join('');
+  }
+
+  function submitComment() {
+    const nameEl = document.getElementById('commenter-name');
+    const inputEl = document.getElementById('comment-input');
+    const msgEl = document.getElementById('submit-msg');
+    const text = inputEl.value.trim();
+
+    if (!text) {
+      msgEl.textContent = 'Please write something first.';
+      msgEl.style.color = 'var(--rust)';
+      msgEl.style.opacity = '1';
+      setTimeout(() => { msgEl.style.opacity = '0'; }, 2500);
+      return;
+    }
+
+    const comments = loadComments();
+    comments.push({ name: nameEl.value.trim(), text: text, timestamp: Date.now() });
+    saveComments(comments);
+
+    inputEl.value = '';
+    nameEl.value = '';
+    updateCharCount();
+    currentPage = 0;
+    renderComments();
+
+    msgEl.textContent = 'Comment posted.';
+    msgEl.style.color = '#2d6a4f';
+    msgEl.style.opacity = '1';
+    setTimeout(() => { msgEl.style.opacity = '0'; }, 2500);
+  }
+
+  function changePage(dir) {
+    const total = loadComments().length;
+    const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+    currentPage = Math.max(0, Math.min(currentPage + dir, totalPages - 1));
+    renderComments();
+  }
+
+  renderComments();
+</script>
+</body>
+</html>
